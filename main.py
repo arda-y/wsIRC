@@ -271,11 +271,10 @@ class wsIRC:
     def add_message(self, message, color="black"):
         self.chat_display.config(state=tk.NORMAL)
         self.chat_display.insert(tk.END, message + "\n")
-        if color:
-            start_index = f"end-{len(message)+2}c"
-            end_index = "end-1c"
-            self.chat_display.tag_add(color, start_index, end_index)
-            self.chat_display.tag_config(color, foreground=color)
+        start_index = f"end-{len(message)+2}c"
+        end_index = "end-1c"
+        self.chat_display.tag_add(color, start_index, end_index)
+        self.chat_display.tag_config(color, foreground=color)
         self.chat_display.config(state=tk.DISABLED)
         self.chat_display.see(tk.END)
 
