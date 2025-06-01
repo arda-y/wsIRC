@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext, messagebox, font
 from tkinter import Tk
+import random as rnd
 
 from async_tkinter_loop import async_handler, async_mainloop
 
@@ -29,6 +30,9 @@ class wsIRC:
 
         self.websocket: ClientConnection
         self.connected: bool = False
+
+        self.tagnum = 0
+        self.rotation = rnd.randint(0, 1000)  # random rotation for colors
 
     def construct_message(self, msg: str, msg_owner: str = "") -> str:
         now = datetime.now().strftime("%H:%M")
@@ -117,10 +121,7 @@ class wsIRC:
             try:
                 encrypted_message = await self.websocket.recv(decode=False)
                 message = cipher.decrypt(encrypted_message).decode()  # decrypts message
-                if str(message).startswith("[SERVER] - "):
-                    self.add_message(message, "blue")
-                else:
-                    self.add_message(message, "black")
+                self.add_message(message)
             except ConnectionClosedOK:
                 break
             except ConnectionClosedError:
@@ -136,6 +137,7 @@ class wsIRC:
                 self.host_entry.config(state=tk.NORMAL)
                 break
             except Exception as e:
+                print(type(e))
                 self.add_message(f"Error receiving message: {str(e)}")
                 break
 
@@ -268,15 +270,60 @@ class wsIRC:
 
         self.message_entry.delete(0, tk.END)
 
-    def add_message(self, message, color="black"):
+    def add_message(self, message: str, color="black"):
         self.chat_display.config(state=tk.NORMAL)
         self.chat_display.insert(tk.END, message + "\n")
-        start_index = f"end-{len(message)+2}c"
-        end_index = "end-1c"
-        self.chat_display.tag_add(color, start_index, end_index)
-        self.chat_display.tag_config(color, foreground=color)
+
+        # coloring logic start
+        COLORS = [
+            "red",
+            "green",
+            "blue",
+            "purple",
+            "dark slate gray",
+            "gold",
+            "dark green",
+            "deep pink",
+            "magenta"
+        ]
+
+        if message[:10] == "[SERVER] -":
+            color = "blue"
+            start_index = f"end-{len(message)+2}c"
+            end_index = "end-1c"
+            self.chat_display.tag_add(str(self.tagnum), start_index, end_index)
+            self.chat_display.tag_config(str(self.tagnum), foreground=color)
+
+        elif message.find("[") == -1 and message.find("]") == -1:
+            # do not touch the color, let the backend decide
+            start_index = f"end-{len(message)+2}c"
+            end_index = "end-1c"
+            self.chat_display.tag_add(str(self.tagnum), start_index, end_index)
+            self.chat_display.tag_config(str(self.tagnum), foreground=color)
+
+        elif message.find("[") != -1 and message.find("]") != -1:
+            # normal text message, color the nickname
+
+            nickname = message[message.find("[") + 1 : message.find("]")]
+            color_of_nickname = (sum(ord(c) for c in nickname) + self.rotation) % len(
+                COLORS
+            )
+            # randomly rotate the color in each launch
+
+            color = COLORS[color_of_nickname]
+            self.chat_display.tag_config(str(self.tagnum), foreground=color)
+            start_index = f"end-{len(message)+2-6}c"  # +2 for /n, -6 for "HH.MM["
+            end_index = f"end-{len(message)+2-6}c + {len(nickname)}c"  # +2 for /n, +len(nickname) for nickname
+            self.chat_display.tag_add(str(self.tagnum), start_index, end_index)
+
+        # coloring logic end
+
+        # end of coloring logic
         self.chat_display.config(state=tk.DISABLED)
         self.chat_display.see(tk.END)
+        self.tagnum += 1
+        if self.tagnum > 1000:
+            self.tagnum = 0
 
 
 if __name__ == "__main__":
