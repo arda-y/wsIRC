@@ -11,14 +11,12 @@ from datetime import datetime
 from cryptography.fernet import Fernet
 
 
-
-
 class wsIRC:
 
     def __init__(self, root: Tk, cipher: Fernet):
         self.cipher: Fernet = cipher
         self.root: Tk = root
-        self.root.title("pisscord")
+        self.root.title("wsIRC")
         self.root.geometry("600x400")
 
         # Configure grid
@@ -119,7 +117,9 @@ class wsIRC:
         while True:
             try:
                 encrypted_message = await self.websocket.recv(decode=False)
-                message = self.cipher.decrypt(encrypted_message).decode()  # decrypts message
+                message = self.cipher.decrypt(
+                    encrypted_message
+                ).decode()  # decrypts message
                 self.add_message(message)
             except ConnectionClosedOK:
                 break
