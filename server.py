@@ -3,6 +3,7 @@ from websockets.asyncio.server import broadcast, ServerConnection, serve
 from users import USER_CREDENTIALS
 from cryptography.fernet import Fernet
 import uvicorn
+from fastapi import FastAPI
 
 KEY = b"6ruz07L563euMQnRSpdptyfz3KqHM3vlyDCXqExHPsA="
 
@@ -96,18 +97,10 @@ if __name__ == "__main__":
     # except KeyboardInterrupt:
     #     print("Server stopped by user.")
     #     quit(0)
-    # we will apply uvicorn to the logic above, so we can run it as a web server
 
-    try:
-        app = ChatServer()
-        uvicorn.run(
-            app.start,
-            host="0.0.0.0",
-            port=8765,
-            log_level="debug",
-            reload=False,
-            factory=True,
-        )
-    except KeyboardInterrupt:
-        print("Server stopped by user.")
-        quit(0)
+    app = FastAPI()
+    chat_server = ChatServer(host="0.0.0.0", port=8765)
+    app.add_event_handler("startup", chat_server.start)
+    app.add_event_handler("shutdown", chat_server.start)
+    uvicorn.run(app, host=chat_server.host, port=chat_server.port, log_level="info")
+    

@@ -3,3 +3,4 @@ cryptography==41.0.7
 async-tkinter-loop==0.9.3
 cffi==1.17.1
 uvicorn==0.34.3
+fastapi==0.115.12
