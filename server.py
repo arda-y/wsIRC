@@ -89,9 +89,16 @@ class ChatServer:
 
 
 if __name__ == "__main__":
-    server = ChatServer()
+    # server = ChatServer()
+    # try:
+    #     asyncio.run(server.start())
+    # except KeyboardInterrupt:
+    #     print("Server stopped by user.")
+    #     quit(0)
+
+    uvicorn_server = ChatServer(host="0.0.0.0", port=8765, debug=True)
     try:
-        asyncio.run(server.start())
+        asyncio.run(uvicorn_server.start())
     except KeyboardInterrupt:
         print("Server stopped by user.")
         quit(0)
