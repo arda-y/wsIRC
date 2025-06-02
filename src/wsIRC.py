@@ -168,9 +168,6 @@ class wsIRC:
         if not host or not username or not password:
             messagebox.showerror("Input Error", "Please fill in all fields.")
             return
-        if not host.replace(".", "").replace(":", "").isalnum():
-            messagebox.showerror("Input Error", "Invalid host address.")
-            return
         if not username.isalnum():
             messagebox.showerror("Input Error", "Username must be alphanumeric.")
             return
