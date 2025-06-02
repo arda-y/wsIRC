@@ -2,7 +2,7 @@ import asyncio
 from websockets.asyncio.server import broadcast, ServerConnection, serve
 from users import USER_CREDENTIALS
 from cryptography.fernet import Fernet
-
+import uvicorn
 KEY = b"6ruz07L563euMQnRSpdptyfz3KqHM3vlyDCXqExHPsA="
 
 
@@ -96,9 +96,11 @@ if __name__ == "__main__":
     #     print("Server stopped by user.")
     #     quit(0)
 
-    uvicorn_server = ChatServer(host="0.0.0.0", port=8765, debug=True)
-    try:
-        asyncio.run(uvicorn_server.start())
-    except KeyboardInterrupt:
-        print("Server stopped by user.")
-        quit(0)
+    uvicorn.run(
+        "server:ChatServer",
+        host="0.0.0.0",
+        port=8765,
+        log_level="debug",
+        reload=False,
+        factory=True,
+    )
